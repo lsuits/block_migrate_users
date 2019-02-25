@@ -31,5 +31,5 @@ New modules will be added for LSUOnline as they require them.
 LSUOnline requested a way to reset the course for a single user while still maintaining that user's data.
 This system allows you to enter the existing user's username along with the new (dummy) user's username to "migrate" the user info from the existing to new user, allowing the existing user to re-take the course as if it was their 1st time.
 
-##Really?
+## Really?
 Really.
