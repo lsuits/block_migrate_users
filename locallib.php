@@ -421,7 +421,13 @@ class migrate {
     public static function can_use() {
         global $CFG, $USER;
         $allowed_users = array();
+        if (!isset($CFG->block_migrate_users_allowed)) {
+            return true;
+        }
         $allowed_users = array_map("trim",explode(',', $CFG->block_migrate_users_allowed));
+        if (count($allowed_users) == 0) {
+            return true;
+        }
         $allowed = is_siteadmin() && in_array($USER->username, $allowed_users);
         return $allowed;
     }
