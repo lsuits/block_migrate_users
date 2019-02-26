@@ -10,6 +10,7 @@ This system should not be used by anyone. It's seriously unsafe and only fits a 
 ## Does it migrate ALL Moodle data?
 Not currently. We support the following:
 1. Enrollment
+1. Groups
 1. Logs
 1. Events
 1. Forum posts

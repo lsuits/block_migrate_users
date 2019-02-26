@@ -77,6 +77,37 @@ class migrate {
         }
     }
 
+
+    /*
+     * Updates the group membership for the specified users / course
+     *
+     * @return true
+     *
+     */
+    public static function handle_groups_membership($userfrom, $userto, $courseid) {
+        global $DB;
+        // Check if the user can do this.
+        if (!self::can_use()) {
+            return get_string('securityviolation', 'block_migrate_users');
+        } else {
+            $dbfamily = $DB->get_dbfamily();
+            if ($dbfamily == 'postgres' or $dbfamily == 'mssql') {
+                $sql = 'UPDATE {groups_members}
+                            SET {groups_members}.userid = :userto
+                        FROM {groups_members} INNER JOIN {groups} ON {groups_members}.groupid = {groups}.id
+                        WHERE {groups}.courseid = :courseid
+                            AND {groups_members}.userid = :userfrom';
+            } else {
+                $sql = 'UPDATE {groups_members}
+                            INNER JOIN {groups} ON {groups_members}.groupid = {groups}.id
+                            SET {groups_members}.userid = :userto
+                        WHERE {groups}.courseid = :courseid
+                            AND {groups_members}.userid = :userfrom';
+            }
+            return $DB->execute($sql, array('userfrom' => self::get_userid($userfrom), 'userto' => self::get_userid($userto), 'courseid' => $courseid));
+        }
+    }
+
     /*
      * Updates the log data for the specified users / course
      *
@@ -401,18 +432,30 @@ class migrate {
             $sql = 'UPDATE {choice_answers} SET userid = :userto WHERE userid = :userfrom AND choiceid IN (SELECT id FROM {choice} WHERE course = :courseid)';
             return $DB->execute($sql, array('userfrom' => self::get_userid($userfrom), 'userto' => self::get_userid($userto), 'courseid' => $courseid));
         }
-    }    /**
-     * Returns the userid for the username in question can use the tool or not.
+    }
+
+    /**
+     * Returns the userid for the username in question.
      *
      * @return int
      */
     public static function get_userid($username) {
         global $DB;
-        $user = $DB->get_record('user', array('username'=>$username));
+        $user = $DB->get_record('user', array('username' => $username));
         $userid = $user->id;
         return $userid;
     }
 
+    /**
+     * Returns the user object for the username in question.
+     *
+     * @return object
+     */
+    public static function get_user($username) {
+        global $DB;
+        $user = $DB->get_record('user', array('username' => $username));
+        return $user;
+    }
     /**
      * Returns if a user can use the tool or not.
      *
