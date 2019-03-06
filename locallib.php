@@ -54,7 +54,16 @@ class migrate {
             return get_string('securityviolation', 'block_migrate_users');
         } else {
             $dbfamily = $DB->get_dbfamily();
-            if ($dbfamily == 'postgres' or $dbfamily == 'mssql') {
+            if ($dbfamily == 'mssql') {
+                $sql = 'UPDATE mdl_role_assignments
+                            SET mdl_role_assignments.userid = :userto
+                        FROM mdl_role_assignments INNER JOIN mdl_context ON mdl_role_assignments.contextid = mdl_context.id
+                            INNER JOIN mdl_role ON mdl_role_assignments.roleid = mdl_role.id
+                        WHERE mdl_role.shortname = "student"
+                            AND mdl_context.instanceid = :courseid
+                            AND mdl_role_assignments.userid = :userfrom
+                            AND mdl_context.contextlevel = "50"';
+            } else if ($dbfamily == 'postgres') {
                 $sql = 'UPDATE {role_assignments}
                             SET {role_assignments}.userid = :userto
                         FROM {role_assignments} INNER JOIN {context} ON {role_assignments}.contextid = {context}.id
